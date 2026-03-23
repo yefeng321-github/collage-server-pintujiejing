@@ -1,16 +1,15 @@
 {
   "name": "collage-server",
   "version": "1.0.0",
-  "description": "图片拼接合图服务，供飞书字段捷径调用",
+  "description": "图片拼接合图服务",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "canvas": "^2.11.2"
+    "jimp": "^1.6.0"
   }
 }
