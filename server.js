@@ -79,7 +79,7 @@ async function collageImages({ images, layout, width, height, gap, bgColor }) {
   return await canvas.getBufferAsync(Jimp.MIME_PNG);
 }
 
-function uploadToTelegraph(pngBuffer) {
+function uploadImage(pngBuffer) {
   return new Promise((resolve, reject) => {
     const boundary = '----FormBoundary' + Date.now().toString(36);
     const filename  = `collage_${Date.now()}.png`;
@@ -92,8 +92,8 @@ function uploadToTelegraph(pngBuffer) {
     const body   = Buffer.concat([header, pngBuffer, footer]);
 
     const options = {
-      hostname: 'telegra.ph',
-      path:     '/upload',
+      hostname: 'imageproxy.zhongzhuan.chat',
+      path:     '/api/upload',
       method:   'POST',
       headers: {
         'Content-Type':   `multipart/form-data; boundary=${boundary}`,
@@ -107,13 +107,13 @@ function uploadToTelegraph(pngBuffer) {
       res.on('end', () => {
         try {
           const json = JSON.parse(data);
-          if (Array.isArray(json) && json[0]?.src) {
-            resolve('https://telegra.ph' + json[0].src);
+          if (json.url) {
+            resolve(json.url);
           } else {
-            reject(new Error('Telegraph upload failed: ' + data));
+            reject(new Error('Upload failed: ' + data));
           }
         } catch (e) {
-          reject(new Error('Telegraph parse error: ' + data));
+          reject(new Error('Parse error: ' + data));
         }
       });
     });
@@ -154,7 +154,7 @@ const server = http.createServer(async (req, res) => {
         const pngBuf = await collageImages({ images, layout, width, height, gap, bgColor });
         console.log(`[collage] done, ${pngBuf.length} bytes, uploading...`);
 
-        const url = await uploadToTelegraph(pngBuf);
+        const url = await uploadImage(pngBuf);
         console.log(`[collage] uploaded: ${url}`);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
